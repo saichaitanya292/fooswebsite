@@ -96,6 +96,77 @@ input, textarea {
     margin-bottom: 10px;
 }
 </style>
+
+<style>
+/* Floating Cart Button */
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #e63946;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1001;
+    transition: transform 0.2s;
+}
+.floating-cart.bounce {
+    animation: bounce 0.4s ease;
+}
+@keyframes bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Cart Modal */
+.cart-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 999;
+}
+.cart-modal {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 350px;
+    height: 100%;
+    background: white;
+    padding: 20px;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+.cart-modal.active { right: 0; }
+.cart-overlay.active { display: block; }
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cart-header button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+.cart-modal input,
+.cart-modal textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+}
+</style>
+
 </head>
 
 <body>
@@ -149,25 +220,6 @@ input, textarea {
 
 </div>
 
-<div class="cart-section">
-    <h3>Your Cart</h3>
-    <div id="cart-items"></div>
-
-    <h3>Checkout</h3>
-
-    <input type="text" id="customer-name" placeholder="Full Name" required>
-    <input type="tel" id="customer-phone" placeholder="Mobile Number" required>
-    <textarea id="customer-address" placeholder="Delivery Address" required></textarea>
-
-    <label>Distance (KM):</label>
-    <input type="number" id="distance" min="1" oninput="calculateDelivery()">
-
-    <p>Delivery Charge: ₹<span id="delivery-charge">0</span></p>
-    <p><strong>Total Payable: ₹<span id="grand-total">0</span></strong></p>
-
-    <button onclick="proceedToPayment()">Proceed to Payment</button>
-</div>
-
 <footer>
 
 <h3>Fry Time Cloud Kitchen</h3>
@@ -189,8 +241,38 @@ Phone: +91 8919218880
 
 </footer>
 
-<script>
+<!-- Floating Cart Button -->
+<div class="floating-cart" onclick="openCart()">
+    🛒 <span id="floating-count">0</span>
+</div>
 
+<!-- Cart Overlay -->
+<div id="cart-overlay" class="cart-overlay" onclick="closeCart()"></div>
+
+<!-- Cart Modal -->
+<div id="cart-modal" class="cart-modal">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button onclick="closeCart()">✖</button>
+    </div>
+
+    <div id="cart-items"></div>
+    <hr>
+
+    <input type="text" id="customer-name" placeholder="Full Name">
+    <input type="tel" id="customer-phone" placeholder="Mobile Number">
+    <textarea id="customer-address" placeholder="Delivery Address"></textarea>
+
+    <label>Distance (KM)</label>
+    <input type="number" id="distance" min="1" oninput="calculateDelivery()">
+
+    <p>Delivery: ₹<span id="delivery-charge">0</span></p>
+    <p><strong>Total: ₹<span id="grand-total">0</span></strong></p>
+
+    <button onclick="proceedToPayment()">Proceed to Payment</button>
+</div>
+
+<script>
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let deliveryCharge = 0;
 
@@ -198,50 +280,86 @@ function saveCart() {
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
+function openCart() {
+    document.getElementById("cart-modal").classList.add("active");
+    document.getElementById("cart-overlay").classList.add("active");
+}
+function closeCart() {
+    document.getElementById("cart-modal").classList.remove("active");
+    document.getElementById("cart-overlay").classList.remove("active");
+}
+
+function bounceCart(){
+    const cartBtn = document.querySelector(".floating-cart");
+    cartBtn.classList.add("bounce");
+    setTimeout(() => cartBtn.classList.remove("bounce"), 400);
+}
+
 function updateCartUI() {
     let cartDiv = document.getElementById("cart-items");
     cartDiv.innerHTML = "";
-    let total = 0;
+    let subtotal = 0;
 
     cart.forEach((item, index) => {
-        total += item.price;
+        subtotal += item.price * item.qty;
         cartDiv.innerHTML += `
             <div class="cart-item">
-                ${item.name} - ₹${item.price}
-                <button onclick="removeItem(${index})">Remove</button>
+                <div>
+                    ${item.name} - ₹${item.price}
+                    <br>
+                    <button onclick="decreaseQty(${index})">−</button>
+                    ${item.qty}
+                    <button onclick="increaseQty(${index})">+</button>
+                </div>
             </div>
         `;
     });
 
-    document.getElementById("cart-count").innerText = cart.length;
-    document.getElementById("cart-total").innerText = total;
+    document.getElementById("floating-count").innerText = cart.length;
     calculateDelivery();
+}
+
+function addToCart(name, price) {
+    let existing = cart.find(item => item.name === name);
+    if(existing){
+        existing.qty++;
+    } else {
+        cart.push({name, price, qty:1});
+    }
+    saveCart();
+    updateCartUI();
+    openCart();
+    bounceCart();
+}
+
+function increaseQty(index) {
+    cart[index].qty++;
+    saveCart();
+    updateCartUI();
+}
+function decreaseQty(index) {
+    if(cart[index].qty > 1){
+        cart[index].qty--;
+    } else {
+        cart.splice(index,1);
+    }
+    saveCart();
+    updateCartUI();
 }
 
 function calculateDelivery() {
     let distance = document.getElementById("distance").value;
-    let total = cart.reduce((sum, item) => sum + item.price, 0);
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-    if(distance) {
-        deliveryCharge = 20 + (distance * 10);
-    } else {
+    if(subtotal >= 500){
         deliveryCharge = 0;
+        document.getElementById("delivery-charge").innerText = "0 (Free)";
+    } else {
+        deliveryCharge = distance ? 20 + (distance * 10) : 0;
+        document.getElementById("delivery-charge").innerText = deliveryCharge;
     }
 
-    document.getElementById("delivery-charge").innerText = deliveryCharge;
-    document.getElementById("grand-total").innerText = total + deliveryCharge;
-}
-
-function addToCart(name, price) {
-    cart.push({name, price});
-    saveCart();
-    updateCartUI();
-}
-
-function removeItem(index) {
-    cart.splice(index, 1);
-    saveCart();
-    updateCartUI();
+    document.getElementById("grand-total").innerText = subtotal + deliveryCharge;
 }
 
 function proceedToPayment() {
@@ -264,6 +382,17 @@ function proceedToPayment() {
 
 updateCartUI();
 
+/* Swipe to close */
+let startX = 0;
+document.getElementById("cart-modal").addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+});
+document.getElementById("cart-modal").addEventListener("touchmove", e => {
+    let moveX = e.touches[0].clientX;
+    if(moveX - startX > 80){
+        closeCart();
+    }
+});
 </script>
 
 </body>
