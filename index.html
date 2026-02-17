@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fry Time</title>
+<title>Fry Time Cloud Kitchen</title>
 
 <style>
 body {
@@ -23,6 +23,7 @@ header {
 
 h1 {
     text-align: center;
+    margin-top: 20px;
 }
 
 .menu-container {
@@ -81,14 +82,18 @@ button:hover {
     margin: 8px 0;
 }
 
-.remove-btn {
-    background: gray;
-    padding: 4px 8px;
+footer {
+    background:#222;
+    color:white;
+    padding:20px;
+    text-align:center;
+    margin-top:40px;
 }
 
-.checkout-btn {
-    background: green;
-    margin-top: 10px;
+input, textarea {
+    width: 90%;
+    padding: 8px;
+    margin-bottom: 10px;
 }
 </style>
 </head>
@@ -96,7 +101,7 @@ button:hover {
 <body>
 
 <header>
-    <h2>🍟 Fry Time</h2>
+    <h2>🍟 Fry Time Cloud Kitchen</h2>
     <div>
         🛒 Items: <span id="cart-count">0</span> |
         Total: ₹<span id="cart-total">0</span>
@@ -108,35 +113,35 @@ button:hover {
 <div class="menu-container">
 
     <div class="card">
-        <img src="images/noodles.png" alt="Schezwan Noodles">
+        <img src="images/noodles.jpg">
         <h3>Schezwan Noodles</h3>
         <div class="price">₹120</div>
         <button onclick="addToCart('Schezwan Noodles',120)">Add to Cart</button>
     </div>
 
     <div class="card">
-        <img src="images/friedrice.png" alt="Veg Fried Rice">
+        <img src="images/friedrice.jpg">
         <h3>Veg Fried Rice</h3>
         <div class="price">₹110</div>
         <button onclick="addToCart('Veg Fried Rice',110)">Add to Cart</button>
     </div>
 
     <div class="card">
-        <img src="images/paneer.png" alt="Chilli Paneer">
+        <img src="images/paneer.jpg">
         <h3>Chilli Paneer</h3>
         <div class="price">₹180</div>
         <button onclick="addToCart('Chilli Paneer',180)">Add to Cart</button>
     </div>
 
     <div class="card">
-        <img src="images/springroll.png" alt="Spring Rolls">
+        <img src="images/springroll.jpg">
         <h3>Spring Rolls</h3>
         <div class="price">₹90</div>
         <button onclick="addToCart('Spring Rolls',90)">Add to Cart</button>
     </div>
 
     <div class="card">
-        <img src="images/manchurian.png" alt="Manchurian">
+        <img src="images/manchurian.jpg">
         <h3>Manchurian</h3>
         <div class="price">₹150</div>
         <button onclick="addToCart('Manchurian',150)">Add to Cart</button>
@@ -147,12 +152,47 @@ button:hover {
 <div class="cart-section">
     <h3>Your Cart</h3>
     <div id="cart-items"></div>
-    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+
+    <h3>Checkout</h3>
+
+    <input type="text" id="customer-name" placeholder="Full Name" required>
+    <input type="tel" id="customer-phone" placeholder="Mobile Number" required>
+    <textarea id="customer-address" placeholder="Delivery Address" required></textarea>
+
+    <label>Distance (KM):</label>
+    <input type="number" id="distance" min="1" oninput="calculateDelivery()">
+
+    <p>Delivery Charge: ₹<span id="delivery-charge">0</span></p>
+    <p><strong>Total Payable: ₹<span id="grand-total">0</span></strong></p>
+
+    <button onclick="proceedToPayment()">Proceed to Payment</button>
 </div>
+
+<footer>
+
+<h3>Fry Time Cloud Kitchen</h3>
+<p>
+Hyderabad, Telangana, India <br>
+Email: support@frytime.com <br>
+Phone: +91 9XXXXXXXXX
+</p>
+
+<p>
+<a href="privacy.html" style="color:white;">Privacy Policy</a> |
+<a href="terms.html" style="color:white;">Terms & Conditions</a> |
+<a href="refund.html" style="color:white;">Refund & Cancellation</a> |
+<a href="shipping.html" style="color:white;">Delivery Policy</a> |
+<a href="contact.html" style="color:white;">Contact Us</a>
+</p>
+
+<p>© 2026 Fry Time Cloud Kitchen. All Rights Reserved.</p>
+
+</footer>
 
 <script>
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let deliveryCharge = 0;
 
 function saveCart() {
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -168,13 +208,28 @@ function updateCartUI() {
         cartDiv.innerHTML += `
             <div class="cart-item">
                 ${item.name} - ₹${item.price}
-                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                <button onclick="removeItem(${index})">Remove</button>
             </div>
         `;
     });
 
     document.getElementById("cart-count").innerText = cart.length;
     document.getElementById("cart-total").innerText = total;
+    calculateDelivery();
+}
+
+function calculateDelivery() {
+    let distance = document.getElementById("distance").value;
+    let total = cart.reduce((sum, item) => sum + item.price, 0);
+
+    if(distance) {
+        deliveryCharge = 20 + (distance * 10);
+    } else {
+        deliveryCharge = 0;
+    }
+
+    document.getElementById("delivery-charge").innerText = deliveryCharge;
+    document.getElementById("grand-total").innerText = total + deliveryCharge;
 }
 
 function addToCart(name, price) {
@@ -189,15 +244,22 @@ function removeItem(index) {
     updateCartUI();
 }
 
-function checkout() {
+function proceedToPayment() {
     if(cart.length === 0){
         alert("Cart is empty!");
         return;
     }
-    alert("Order placed successfully 🎉");
-    cart = [];
-    saveCart();
-    updateCartUI();
+
+    let name = document.getElementById("customer-name").value;
+    let phone = document.getElementById("customer-phone").value;
+    let address = document.getElementById("customer-address").value;
+
+    if(!name || !phone || !address){
+        alert("Please fill all details.");
+        return;
+    }
+
+    alert("Redirecting to secure PayU payment gateway...");
 }
 
 updateCartUI();
