@@ -1,92 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Fry Time - Chinese Fast Food</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Fry Time</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body {font-family: Arial; margin:0; padding:0; background:#fff8f0;}
-header {background:#c62828; color:white; padding:20px; text-align:center;}
-nav {background:#ff7043; padding:10px; text-align:center;}
-nav a {margin:15px; text-decoration:none; color:white; font-weight:bold;}
-section {padding:40px; text-align:center;}
-.products {display:flex; justify-content:center; gap:30px; flex-wrap:wrap;}
-.card {border:1px solid #ddd; padding:20px; width:250px; border-radius:10px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-button {background:#c62828; color:white; padding:10px; border:none; cursor:pointer; border-radius:5px;}
-button:hover {background:#8e0000;}
-footer {background:#333; color:white; text-align:center; padding:20px;}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5efe6;
+}
+
+header {
+    background: #222;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 30px;
+}
+
+.card {
+    background: white;
+    width: 250px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.price {
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.btn {
+    background-color: #e63946;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #c1121f;
+}
+
+.cart-section {
+    background: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.remove-btn {
+    background: gray;
+    padding: 4px 10px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checkout-btn {
+    margin-top: 15px;
+    background: green;
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🔥 Fry Time</h1>
-<p>Hot • Fresh • Delicious Chinese Food</p>
+    <h2>🍟 Fry Time</h2>
+    <div>
+        🛒 Items: <span id="cart-count">0</span> |
+        Total: ₹<span id="cart-total">0</span>
+    </div>
 </header>
 
-<nav>
-<a href="#home">Home</a>
-<a href="#menu">Menu</a>
-<a href="#about">About</a>
-<a href="#contact">Contact</a>
-</nav>
+<h2 style="text-align:center;">Our Special Menu</h2>
 
-<section id="home">
-<h2>Welcome to Fry Time</h2>
-<p>Your favorite destination for authentic Chinese fast food.</p>
-</section>
+<div class="menu-container">
 
-<section id="menu">
-<h2>Our Special Menu</h2>
-<div class="products">
+    <div class="card">
+        <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246">
+        <h3>Schezwan Noodles</h3>
+        <div class="price">₹120</div>
+        <button class="btn" onclick="addToCart('Schezwan Noodles',120)">Add to Cart</button>
+    </div>
 
-<div class="card">
-<h3>Schezwan Noodles</h3>
-<p>₹120</p>
-<button>Order Now</button>
-</div>
+    <div class="card">
+        <img src="https://images.unsplash.com/photo-1604908176997-4318f5a4a7b0">
+        <h3>Veg Fried Rice</h3>
+        <div class="price">₹110</div>
+        <button class="btn" onclick="addToCart('Veg Fried Rice',110)">Add to Cart</button>
+    </div>
 
-<div class="card">
-<h3>Veg Fried Rice</h3>
-<p>₹110</p>
-<button>Order Now</button>
-</div>
+    <div class="card">
+        <img src="https://images.unsplash.com/photo-1631452180519-c014fe946bc7">
+        <h3>Chilli Paneer</h3>
+        <div class="price">₹180</div>
+        <button class="btn" onclick="addToCart('Chilli Paneer',180)">Add to Cart</button>
+    </div>
 
-<div class="card">
-<h3>Chilli Paneer</h3>
-<p>₹180</p>
-<button>Order Now</button>
-</div>
+    <div class="card">
+        <img src="https://images.unsplash.com/photo-1604908177522-4328e3fb45f3">
+        <h3>Spring Rolls</h3>
+        <div class="price">₹90</div>
+        <button class="btn" onclick="addToCart('Spring Rolls',90)">Add to Cart</button>
+    </div>
 
-<div class="card">
-<h3>Spring Rolls</h3>
-<p>₹90</p>
-<button>Order Now</button>
-</div>
-
-<div class="card">
-<h3>Manchurian</h3>
-<p>₹150</p>
-<button>Order Now</button>
-</div>
+    <div class="card">
+        <img src="https://images.unsplash.com/photo-1625943553852-781c6dd46faa">
+        <h3>Manchurian</h3>
+        <div class="price">₹150</div>
+        <button class="btn" onclick="addToCart('Manchurian',150)">Add to Cart</button>
+    </div>
 
 </div>
-</section>
 
-<section id="about">
-<h2>About Fry Time</h2>
-<p>We serve fresh and spicy Chinese dishes prepared with premium ingredients and authentic flavors.</p>
-</section>
+<div class="cart-section">
+    <h3>Your Cart</h3>
+    <div id="cart-items"></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+</div>
 
-<section id="contact">
-<h2>Contact Us</h2>
-<p>📍 Tellapur, Telangana</p>
-<p>📞 +91 98765 43210</p>
-</section>
+<script>
 
-<footer>
-<p>© 2026 Fry Time | All Rights Reserved</p>
-</footer>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateCartUI() {
+    let cartItemsDiv = document.getElementById("cart-items");
+    cartItemsDiv.innerHTML = "";
+
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        total += item.price;
+
+        cartItemsDiv.innerHTML += `
+            <div class="cart-item">
+                ${item.name} - ₹${item.price}
+                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            </div>
+        `;
+    });
+
+    document.getElementById("cart-count").innerText = cart.length;
+    document.getElementById("cart-total").innerText = total;
+}
+
+function addToCart(name, price) {
+    cart.push({name, price});
+    saveCart();
+    updateCartUI();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    updateCartUI();
+}
+
+function checkout() {
+    if(cart.length === 0){
+        alert("Your cart is empty!");
+        return;
+    }
+    alert("Order placed successfully! 🎉");
+    cart = [];
+    saveCart();
+    updateCartUI();
+}
+
+updateCartUI();
+
+</script>
 
 </body>
 </html>
