@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <div style="background:#007bff;color:white;padding:10px;">Chatbot</div>
         <div id="chatMessages" style="flex:1;padding:10px;overflow-y:auto;"></div>
         <div style="display:flex;">
-            <input id="chatInput" type="text" style="flex:1;padding:10px;">
+            <input id="chatInput" type="text" placeholder="Type..." style="flex:1;padding:10px;">
             <button id="sendBtn">Send</button>
         </div>
     `;
@@ -45,5 +45,49 @@ document.addEventListener("DOMContentLoaded", function () {
     button.onclick = () => {
         chatBox.style.display = chatBox.style.display === "none" ? "flex" : "none";
     };
+
+    // ✅ SEND MESSAGE FUNCTION
+    async function sendMessage() {
+        const input = document.getElementById("chatInput");
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        const chatMessages = document.getElementById("chatMessages");
+
+        // Show user message
+        chatMessages.innerHTML += `<div><b>You:</b> ${message}</div>`;
+        input.value = "";
+
+        try {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await res.json();
+
+            // Show bot reply
+            chatMessages.innerHTML += `<div><b>Bot:</b> ${data.reply || "No response"}</div>`;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        } catch (error) {
+            console.error(error);
+            chatMessages.innerHTML += `<div style="color:red;">Error connecting ❌</div>`;
+        }
+    }
+
+    // ✅ BUTTON CLICK EVENT
+    document.getElementById("sendBtn").onclick = sendMessage;
+
+    // ✅ ENTER KEY SUPPORT
+    document.getElementById("chatInput").addEventListener("keypress", function(e){
+        if(e.key === "Enter"){
+            sendMessage();
+        }
+    });
 
 });
